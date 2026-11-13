@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: duplicado-al-confirmar
+expected_outcome: |
+  Vuelve a leer el borrador para ver la póliza existente, se la muestra a la persona y le pregunta si vincular el PDF, completar lo que falta o si es otra vigencia; no decide por ella ni crea otra póliza.
+context:
+  scaffold_script: place-files.sh

@@ -1,0 +1,6 @@
+{
+  "name": "softseguros-sync",
+  "description": "Skill para usar bien el MCP del Sincronizador de Softseguros: pólizas, cartera, anexos, certificados, archivos, correo y creación de pólizas desde PDF.",
+  "version": "1.0.0",
+  "author": { "name": "Softseguros" }
+}

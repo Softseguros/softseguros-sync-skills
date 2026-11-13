@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: anexo-por-correo
+expected_outcome: |
+  Encuentra el correo entre los procesados, crea el borrador con el file_id del adjunto, espera la lectura, muestra el plan del anexo (hoy → queda, modo de prima) y solo confirma con el «sí» explícito de la persona.
+context:
+  scaffold_script: place-files.sh

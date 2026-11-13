@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: numero-con-formato-sin-resultados
+expected_outcome: |
+  Reintenta con search (coincidencia parcial) usando el tramo distintivo del número y con el slug correcto o sin aseguradora, antes de concluir nada.
+context:
+  scaffold_script: place-files.sh

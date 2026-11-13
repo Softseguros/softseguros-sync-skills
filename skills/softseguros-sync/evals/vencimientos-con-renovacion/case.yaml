@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: vencimientos-con-renovacion
+expected_outcome: |
+  Busca por fin de vigencia del 16 al 22 de noviembre de 2026 con el slug «bolivar», distingue las vigentes por renovar de las ya renovadas con los estados de la póliza, lee el tipo en cada fila porque no es un filtro, y dice el rango y el total.
+context:
+  scaffold_script: place-files.sh

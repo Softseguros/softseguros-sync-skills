@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: rol-sin-correo
+expected_outcome: |
+  Como el catálogo no trae tools de correo, explica que el rol de la persona no incluye leer el correo y que un administrador lo cambia en Ajustes › Miembros; no simula la búsqueda con otra tool.
+context:
+  scaffold_script: place-files.sh
