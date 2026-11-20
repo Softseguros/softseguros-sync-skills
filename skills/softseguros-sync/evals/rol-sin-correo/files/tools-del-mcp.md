@@ -21,6 +21,36 @@ Each row carries master_policy_unique_key (pass it to get_policy).
 [Insurance Sync] Get one normalized certificate of the agency by its unique_key
 (opaque: copy it from a search_certificates row).
 
+## `search_sellers(query: Optional[str] = None, active: Optional[bool] = True)`
+
+[Insurance Sync] List the agency's sellers (vendedores), to find the seller_id of a person.
+
+query: part of the name, without caring about accents or case ("perez" finds "Pérez"). active: true (the
+default) lists only active sellers, false only inactive ones, null both. Returns sellers [{seller_id,
+name, active, default_commission {pct, base} or null}] (at most 50) and total. Two sellers with a similar
+name: ask the person which one before using a seller_id. An inactive seller cannot be added to a policy.
+
+## `get_policy_sellers(unique_key: str)`
+
+[Insurance Sync] The sellers stored on one policy cycle (unique_key from search_policies).
+
+Returns version, origin and sellers [{seller_id, name, active, pct, base, fixed_amount, source,
+in_split}]. base is what pct applies to: net_premium (prima neta), agency_commission (comisión de la
+agencia) or agency_net_received (comisión neta recibida). The pct of different sellers do not add up to
+100: each is over its own base. in_split marks a reparto (a pool shared by several sellers). source says
+where pct came from: seller_rule, seller_default, all_sellers_rule, default_rule or manual. An empty list
+at version 0 means nobody assigned sellers.
+
+## `preview_policy_sellers(unique_key: str, seller_ids: List[str])`
+
+[Insurance Sync] What adding sellers to a policy would do, without saving anything.
+
+unique_key from search_policies; seller_ids (1 to 10) from search_sellers. Returns the sellers the policy
+has now (version, sellers, as get_policy_sellers) and proposed [{seller_id, name, active,
+already_on_policy, would_be_added, pct, base, source}]: the pct and base the agency's commission rules
+give each seller on this policy. Show this to the person and wait for their explicit yes before
+add_policy_sellers. A seller with active false cannot be added: leave it out.
+
 ## `search_endorsements(carrier: Optional[str] = None, search: Optional[str] = None, policy_number: Optional[str] = None, page: int = 1, limit: int = 20)`
 
 [Insurance Sync] Search the agency's normalized endorsements (anexos), newest record

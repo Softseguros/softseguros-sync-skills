@@ -3,8 +3,8 @@
 Una skill (formato abierto Agent Skills, `SKILL.md`) que le enseña a un agente de IA a usar bien
 el MCP del Sincronizador de Softseguros (`https://sync-api.softseguros.com/mcp`): qué tool usar
 para cada cosa, cómo buscar sin quedarse en vacío, qué significa cada estado, cómo crear una
-póliza desde un PDF o aplicar un anexo, cómo leer el correo de la agencia y qué hacer con cada
-error.
+póliza desde un PDF o aplicar un anexo, cómo leer el correo de la agencia, cómo asignar vendedores
+a las pólizas y qué hacer con cada error.
 
 Funciona en Claude (Code, Desktop y claude.ai), ChatGPT y Codex, opencode y Hermes Agent, porque
 todos leen el mismo formato.
@@ -95,6 +95,8 @@ Con la skill instalada y el MCP conectado, pídele al agente:
 - «Busca la póliza 580-40-900000012345.» (debe usar `search`, no `policy_number`)
 - «Llegó por correo un anexo de SURA para la póliza X; aplícalo.» (debe mostrar el plan y esperar
   tu «sí» antes de confirmar)
+- «Asígnale a Juan Pérez la póliza 1012345678 de SURA.» (debe mostrar el % y la base que le
+  quedan y esperar tu «sí» antes de guardar)
 
 ## Qué trae
 
@@ -107,6 +109,7 @@ skills/softseguros-sync/
     crear-poliza-desde-pdf.md   borradores de principio a fin
     anexos-y-cancelaciones.md   cuando el PDF no es una póliza nueva
     correo.md                   correo procesado y buzón en vivo
+    vendedores.md               buscar vendedores y agregarlos a pólizas
     recetas.md                  tareas de varios pasos
     errores.md                  mensajes de error y resultados vacíos
   evals/                      casos de prueba (no se instalan)
@@ -125,8 +128,11 @@ las tools, y las tareas reales cruzan temas, del correo al borrador y de ahí a 
 
 ## Contribuir
 
-`scripts/tool-catalog.json` es el catálogo de tools del servidor (nombre, parámetros y
-descripción). Después de cambiar la skill:
+`scripts/tool-catalog.json` es el catálogo de tools del servidor (nombre, parámetros,
+descripción y `scopes`, los permisos que pide cada una; sin `scopes` es de cualquier miembro).
+`python3 scripts/render_tool_catalog.py > docs/tools-del-mcp.md` escribe el catálogo completo, y
+`--role <rol>` (`admin`, `operations_commissions`, `operations`, `commissions`, `reader`) solo lo
+que ve ese rol, para las pruebas. Después de cambiar la skill:
 
 ```bash
 python3 scripts/validate.py

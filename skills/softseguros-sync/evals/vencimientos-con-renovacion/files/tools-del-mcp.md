@@ -21,6 +21,49 @@ Each row carries master_policy_unique_key (pass it to get_policy).
 [Insurance Sync] Get one normalized certificate of the agency by its unique_key
 (opaque: copy it from a search_certificates row).
 
+## `search_sellers(query: Optional[str] = None, active: Optional[bool] = True)`
+
+[Insurance Sync] List the agency's sellers (vendedores), to find the seller_id of a person.
+
+query: part of the name, without caring about accents or case ("perez" finds "Pérez"). active: true (the
+default) lists only active sellers, false only inactive ones, null both. Returns sellers [{seller_id,
+name, active, default_commission {pct, base} or null}] (at most 50) and total. Two sellers with a similar
+name: ask the person which one before using a seller_id. An inactive seller cannot be added to a policy.
+
+## `get_policy_sellers(unique_key: str)`
+
+[Insurance Sync] The sellers stored on one policy cycle (unique_key from search_policies).
+
+Returns version, origin and sellers [{seller_id, name, active, pct, base, fixed_amount, source,
+in_split}]. base is what pct applies to: net_premium (prima neta), agency_commission (comisión de la
+agencia) or agency_net_received (comisión neta recibida). The pct of different sellers do not add up to
+100: each is over its own base. in_split marks a reparto (a pool shared by several sellers). source says
+where pct came from: seller_rule, seller_default, all_sellers_rule, default_rule or manual. An empty list
+at version 0 means nobody assigned sellers.
+
+## `preview_policy_sellers(unique_key: str, seller_ids: List[str])`
+
+[Insurance Sync] What adding sellers to a policy would do, without saving anything.
+
+unique_key from search_policies; seller_ids (1 to 10) from search_sellers. Returns the sellers the policy
+has now (version, sellers, as get_policy_sellers) and proposed [{seller_id, name, active,
+already_on_policy, would_be_added, pct, base, source}]: the pct and base the agency's commission rules
+give each seller on this policy. Show this to the person and wait for their explicit yes before
+add_policy_sellers. A seller with active false cannot be added: leave it out.
+
+## `add_policy_sellers(unique_keys: List[str], seller_ids: List[str])`
+
+[Insurance Sync] Add sellers to policies (1 to 50 unique_keys, 1 to 10 seller_ids). Saves at once.
+
+Only call it after preview_policy_sellers and the person's explicit yes. Each seller the policy does not
+have yet is appended with the pct and base the rules give it there (the ones the preview showed); the
+sellers already on the policy, their pct and their repartos are left exactly as they are. Every seller
+must be active, else nothing is saved. Returns requested, updated [{unique_key, version, sellers}],
+already_had (policies that had every seller), skipped_missing (no policy of the agency) and
+skipped_conflict (somebody changed the policy's sellers meanwhile, or its stored list cannot be extended:
+read it with get_policy_sellers and tell the person). Changing a pct, removing a seller or a reparto is
+done in the web app.
+
 ## `list_mailboxes()`
 
 [Insurance Sync] List the agency's mailboxes the person has access to.

@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: vendedor-ambiguo
+expected_outcome: |
+  Ante dos vendedores con el mismo nombre pregunta cuál es antes de seguir; no elige uno por su cuenta ni guarda nada.
+context:
+  scaffold_script: place-files.sh

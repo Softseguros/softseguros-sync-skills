@@ -3,7 +3,8 @@
 
 Uso:
     python3 scripts/render_tool_catalog.py > docs/tools-del-mcp.md
-    python3 scripts/render_tool_catalog.py --only-any-member > …   # lo que ve un rol que no opera pólizas
+    python3 scripts/render_tool_catalog.py --only-any-member > …   # solo las tools de cualquier miembro
+    python3 scripts/render_tool_catalog.py --role reader > …       # lo que ve un rol de la agencia
 
 Lee `scripts/tool-catalog.json`. El resultado sirve como
 referencia y como archivo de entrada de las pruebas de `skills/softseguros-sync/evals/`: así una
@@ -17,6 +18,16 @@ import sys
 from pathlib import Path
 
 CATALOG = Path(__file__).with_name("tool-catalog.json")
+
+# Los permisos (scopes) que piden las tools del catálogo, por rol de la agencia. Es solo la parte del mapa del
+# servidor (app/auth/scopes.py, ROLE_SCOPES) que el catálogo usa: una tool sin scopes es de cualquier miembro.
+ROLE_SCOPES = {
+    "admin": {"policies.operate", "sellers.assign"},
+    "operations_commissions": {"policies.operate", "sellers.assign"},
+    "operations": {"policies.operate", "sellers.assign"},
+    "commissions": {"sellers.assign"},
+    "reader": set(),
+}
 
 
 def render(tools: list[dict]) -> str:
@@ -38,8 +49,16 @@ def render(tools: list[dict]) -> str:
 
 def main() -> int:
     tools = json.loads(CATALOG.read_text(encoding="utf-8"))["tools"]
-    if "--only-any-member" in sys.argv[1:]:
-        tools = [tool for tool in tools if not tool["restricted"]]
+    arguments = sys.argv[1:]
+    if "--only-any-member" in arguments:
+        tools = [tool for tool in tools if not tool["scopes"]]
+    if "--role" in arguments:
+        position = arguments.index("--role") + 1
+        role = arguments[position] if position < len(arguments) else ""
+        if role not in ROLE_SCOPES:
+            sys.stderr.write(f"--role debe ser uno de: {', '.join(ROLE_SCOPES)}\n")
+            return 2
+        tools = [tool for tool in tools if set(tool["scopes"]) <= ROLE_SCOPES[role]]
     sys.stdout.write(render(tools))
     return 0
 

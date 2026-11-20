@@ -14,6 +14,7 @@ Cada receta da el orden de las llamadas y dónde hay que parar a preguntar. Los 
 - [7. Revisar la bandeja pendiente](#7-revisar-la-bandeja-pendiente)
 - [8. Borradores que quedaron a medias](#8-borradores-que-quedaron-a-medias)
 - [9. Historia de una póliza](#9-historia-de-una-póliza)
+- [10. Asignar un vendedor a las pólizas de un cliente](#10-asignar-un-vendedor-a-las-pólizas-de-un-cliente)
 
 ## 1. Del correo a la póliza
 
@@ -85,6 +86,7 @@ cartera solo de las que le interesen.
 3. `search_payments(search="900123456")`: su cartera.
 4. `search_files(query=<nombre o NIT>)`: documentos sueltos.
 5. `search_emails(query=<nombre>)`, si la persona tiene acceso al correo.
+6. Los vendedores de cada póliza vienen en `commission_sellers` de las filas del paso 1.
 
 Presenta por secciones (pólizas vigentes, por vencer, cartera, documentos) y deja lo histórico en
 una línea («además, 6 vigencias anteriores»). Los datos de contacto del cliente (teléfonos,
@@ -133,3 +135,20 @@ correos, dirección) no se consultan desde este MCP: están en la app, en Contac
 5. Cuenta la historia en orden: emisión, renovaciones, anexos (con lo que cambiaron), cancelación
    si la hubo, saldo pendiente. Señala los cambios aplicados desde un PDF
    (`manual_override_fields`).
+
+## 10. Asignar un vendedor a las pólizas de un cliente
+
+«Ponle a Ana Gómez todas las pólizas vigentes de Transportes Andinos.»
+
+1. `search_policies(search=<NIT o nombre>, status="active")`. Muestra cuántas son y cuáles
+   (número, aseguradora, producto, vendedores actuales de `commission_sellers`).
+2. `search_sellers(query="ana gomez")`. Si hay más de una, pregunta cuál.
+3. `preview_policy_sellers(unique_key=<una de ellas>, seller_ids=[<seller_id>])`, y otra de una
+   aseguradora o producto distinto si las hay: el % puede cambiar entre pólizas.
+4. Muestra el resumen: cuántas pólizas, a quién se agrega, el % y la base de ejemplo, cuáles ya la
+   tienen. **Para y espera el «sí».**
+5. `add_policy_sellers(unique_keys=[<las pólizas>], seller_ids=[<seller_id>])`, hasta 50 por llamada.
+6. Informa con `updated`, `already_had` y `skipped_conflict`. Las de `skipped_conflict` no se
+   tocaron: léelas con `get_policy_sellers` y pregunta qué hacer.
+
+Detalle en [vendedores.md](vendedores.md).
