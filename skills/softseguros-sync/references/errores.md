@@ -15,7 +15,7 @@ hace falta el detalle (el borrador actual, la póliza que ya existe), vuelve a l
 
 El catálogo se arma según el rol de la persona. Si no ves las tools de borradores ni las de correo,
 su rol no opera pólizas (lo hacen Administrador, Operación y Operación y comisiones). Si no ves
-`add_policy_sellers`, su rol no asigna vendedores (Consulta). No es un fallo de conexión.
+`add_policy_sellers` ni `set_policy_sellers`, su rol no asigna vendedores (Consulta). No es un fallo de conexión.
 Explícalo y remite a un administrador de la agencia (Ajustes › Miembros).
 
 Si no aparece **ninguna** tool, la credencial no es válida: mira «Permisos y autenticación».
@@ -74,6 +74,10 @@ mirar oculta el motivo del rechazo.
 | «El vendedor indicado no existe» / «No encontramos ese vendedor» | `seller_id` equivocado. Usa uno de `search_sellers`. |
 | «El vendedor está inactivo» | No se guardó nada. Quita ese vendedor del pedido y dile a la persona que se reactiva en Comisiones › Vendedores. |
 | «Hay demasiados elementos en la solicitud» | Más de 50 pólizas o 10 vendedores. Divide el pedido o hazlo en la app. |
+| «Los vendedores de esta póliza cambiaron mientras los editabas» | No se guardó nada: la `expected_version` ya no es la guardada. `get_policy_sellers`, muestra la lista nueva y pregunta otra vez antes de repetir. |
+| «Esta póliza tiene un reparto entre vendedores: cámbialo en la app…» | `set_policy_sellers` no toca pólizas con reparto. Dile que se cambia en Pólizas › la póliza › Vendedores. |
+| «Revisa los porcentajes y montos» | Un % fuera de 0 a 100, un monto negativo o una base que no corresponde. Corrige el valor con la persona. |
+| «… must be a number», «base must be one of…», «unknown keys in sellers…», «a seller appears twice…» | La lista de `set_policy_sellers` está mal armada: cada entrada es `{seller_id, pct?, base?, fixed_amount?}`, una por vendedor. |
 | «… must name at least one», «… must be a list» | Falta la lista de pólizas o de vendedores: pásala como lista, aunque sea de uno. |
 
 Un `skipped_conflict` en la respuesta no es un error: esa póliza no se tocó. Léela con

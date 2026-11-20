@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: cambiar-porcentaje-con-reparto
+expected_outcome: |
+  Reconoce por in_split que la póliza tiene un reparto, explica que ese cambio se hace en la app (Pólizas › la póliza › Vendedores) y no llama set_policy_sellers ni simula el cambio.
+context:
+  scaffold_script: place-files.sh

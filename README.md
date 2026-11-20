@@ -97,6 +97,7 @@ Con la skill instalada y el MCP conectado, pídele al agente:
   tu «sí» antes de confirmar)
 - «Asígnale a Juan Pérez la póliza 1012345678 de SURA.» (debe mostrar el % y la base que le
   quedan y esperar tu «sí» antes de guardar)
+- «Quita a Ana Gómez de esa póliza.» (debe mostrar la lista antes y después y esperar tu «sí»)
 
 ## Qué trae
 
@@ -109,7 +110,7 @@ skills/softseguros-sync/
     crear-poliza-desde-pdf.md   borradores de principio a fin
     anexos-y-cancelaciones.md   cuando el PDF no es una póliza nueva
     correo.md                   correo procesado y buzón en vivo
-    vendedores.md               buscar vendedores y agregarlos a pólizas
+    vendedores.md               buscar, agregar y cambiar los vendedores de las pólizas
     recetas.md                  tareas de varios pasos
     errores.md                  mensajes de error y resultados vacíos
   evals/                      casos de prueba (no se instalan)

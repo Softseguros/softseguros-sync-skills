@@ -152,7 +152,33 @@
           "required": true
         }
       ],
-      "description": "[Insurance Sync] Add sellers to policies (1 to 50 unique_keys, 1 to 10 seller_ids). Saves at once.\n\nOnly call it after preview_policy_sellers and the person's explicit yes. Each seller the policy does not\nhave yet is appended with the pct and base the rules give it there (the ones the preview showed); the\nsellers already on the policy, their pct and their repartos are left exactly as they are. Every seller\nmust be active, else nothing is saved. Returns requested, updated [{unique_key, version, sellers}],\nalready_had (policies that had every seller), skipped_missing (no policy of the agency) and\nskipped_conflict (somebody changed the policy's sellers meanwhile, or its stored list cannot be extended:\nread it with get_policy_sellers and tell the person). Changing a pct, removing a seller or a reparto is\ndone in the web app."
+      "description": "[Insurance Sync] Add sellers to policies (1 to 50 unique_keys, 1 to 10 seller_ids). Saves at once.\n\nOnly call it after preview_policy_sellers and the person's explicit yes. Each seller the policy does not\nhave yet is appended with the pct and base the rules give it there (the ones the preview showed); the\nsellers already on the policy, their pct and their repartos are left exactly as they are. Every seller\nmust be active, else nothing is saved. Returns requested, updated [{unique_key, version, sellers}],\nalready_had (policies that had every seller), skipped_missing (no policy of the agency) and\nskipped_conflict (somebody changed the policy's sellers meanwhile, or its stored list cannot be extended:\nread it with get_policy_sellers and tell the person). To change a pct or remove a seller use\nset_policy_sellers; a reparto is changed in the web app."
+    },
+    {
+      "name": "set_policy_sellers",
+      "kind": "write",
+      "restricted": true,
+      "scopes": [
+        "sellers.assign"
+      ],
+      "parameters": [
+        {
+          "name": "unique_key",
+          "type": "str",
+          "required": true
+        },
+        {
+          "name": "expected_version",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "sellers",
+          "type": "List[Dict[str, Any]]",
+          "required": true
+        }
+      ],
+      "description": "[Insurance Sync] Replace the sellers of one policy cycle: change a pct or base, remove or add a seller.\nSaves at once.\n\nexpected_version: the version get_policy_sellers (or preview_policy_sellers) answered; if the sellers\nchanged since, nothing is saved: read them again and show the person. sellers: the WHOLE list that must\nremain, at most 10, each {seller_id, pct?, base?, fixed_amount?}; a seller left out is removed, [] removes\nevery seller. A seller already on the policy keeps the pct, base and fixed_amount the entry leaves out; a\nnew seller without pct or base gets what the agency's rules give it (as in preview_policy_sellers). base:\nnet_premium, agency_commission or agency_net_received. fixed_amount: an amount instead of the %, null\nclears it. A policy with a reparto (in_split) is refused: that is changed in the web app. Before calling\nit, show the person the list before and after and wait for their explicit yes. Returns version, sellers,\nchanged (false when the list was already that one), added and removed (names)."
     },
     {
       "name": "list_mailboxes",

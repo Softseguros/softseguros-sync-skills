@@ -15,6 +15,7 @@ Cada receta da el orden de las llamadas y dónde hay que parar a preguntar. Los 
 - [8. Borradores que quedaron a medias](#8-borradores-que-quedaron-a-medias)
 - [9. Historia de una póliza](#9-historia-de-una-póliza)
 - [10. Asignar un vendedor a las pólizas de un cliente](#10-asignar-un-vendedor-a-las-pólizas-de-un-cliente)
+- [11. Cambiar un vendedor por otro](#11-cambiar-un-vendedor-por-otro)
 
 ## 1. Del correo a la póliza
 
@@ -152,3 +153,19 @@ correos, dirección) no se consultan desde este MCP: están en la app, en Contac
    tocaron: léelas con `get_policy_sellers` y pregunta qué hacer.
 
 Detalle en [vendedores.md](vendedores.md).
+
+## 11. Cambiar un vendedor por otro
+
+«En la póliza 994000020655 de Allianz, quita a Ana y pon a Juan con el 12 %.»
+
+1. `search_policies(search="994000020655", carrier="allianz")` → `unique_key` de la vigencia.
+2. `get_policy_sellers(unique_key=<unique_key>)` → `version` y la lista. Con un `in_split: true`,
+   para: el reparto se cambia en la app.
+3. `search_sellers(query="juan")` → su `seller_id` (pregunta si hay más de uno).
+4. Muestra antes y después: «Hoy: Ana Gómez 10 % sobre la comisión de la agencia, Carlos Ruiz 5 %.
+   Queda: Juan Pérez 12 % sobre la comisión de la agencia, Carlos Ruiz 5 %.» **Para y espera el «sí».**
+5. `set_policy_sellers(unique_key=<unique_key>, expected_version=<version>, sellers=<lista>)`, con
+   `<lista>` = `[{"seller_id": <Juan>, "pct": 12, "base": "agency_commission"}, {"seller_id": <Carlos>}]`.
+   Ana no va: sale.
+6. Confirma con `added` y `removed`. Si responde que los vendedores cambiaron mientras tanto, vuelve al
+   paso 2.

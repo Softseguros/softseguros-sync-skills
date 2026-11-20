@@ -61,8 +61,23 @@ sellers already on the policy, their pct and their repartos are left exactly as 
 must be active, else nothing is saved. Returns requested, updated [{unique_key, version, sellers}],
 already_had (policies that had every seller), skipped_missing (no policy of the agency) and
 skipped_conflict (somebody changed the policy's sellers meanwhile, or its stored list cannot be extended:
-read it with get_policy_sellers and tell the person). Changing a pct, removing a seller or a reparto is
-done in the web app.
+read it with get_policy_sellers and tell the person). To change a pct or remove a seller use
+set_policy_sellers; a reparto is changed in the web app.
+
+## `set_policy_sellers(unique_key: str, expected_version: int, sellers: List[Dict[str, Any]])`
+
+[Insurance Sync] Replace the sellers of one policy cycle: change a pct or base, remove or add a seller.
+Saves at once.
+
+expected_version: the version get_policy_sellers (or preview_policy_sellers) answered; if the sellers
+changed since, nothing is saved: read them again and show the person. sellers: the WHOLE list that must
+remain, at most 10, each {seller_id, pct?, base?, fixed_amount?}; a seller left out is removed, [] removes
+every seller. A seller already on the policy keeps the pct, base and fixed_amount the entry leaves out; a
+new seller without pct or base gets what the agency's rules give it (as in preview_policy_sellers). base:
+net_premium, agency_commission or agency_net_received. fixed_amount: an amount instead of the %, null
+clears it. A policy with a reparto (in_split) is refused: that is changed in the web app. Before calling
+it, show the person the list before and after and wait for their explicit yes. Returns version, sellers,
+changed (false when the list was already that one), added and removed (names).
 
 ## `list_mailboxes()`
 
