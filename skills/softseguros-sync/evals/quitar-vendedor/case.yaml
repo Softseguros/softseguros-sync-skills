@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: quitar-vendedor
+expected_outcome: |
+  Muestra la lista antes y después, espera el «sí» y, al guardar con set_policy_sellers, manda la lista completa que queda (Carlos Ruiz sin cambios) con la expected_version 4; no deja la póliza sin vendedores ni usa add_policy_sellers.
+context:
+  scaffold_script: place-files.sh

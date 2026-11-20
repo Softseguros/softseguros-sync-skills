@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: asignar-vendedor
+expected_outcome: |
+  Busca la póliza y al vendedor para tener su unique_key y su seller_id, muestra con preview_policy_sellers qué % y base le quedan y se detiene a esperar el «sí» de la persona; no guarda en ese turno ni inventa ids.
+context:
+  scaffold_script: place-files.sh

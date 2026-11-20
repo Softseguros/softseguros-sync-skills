@@ -28,7 +28,7 @@ CATALOG = Path(__file__).with_name("tool-catalog.json")
 
 ALLOWED_KEYS = {"name", "description", "license", "allowed-tools", "metadata", "compatibility"}
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-TOOL_LIKE = re.compile(r"^(search|get|download|create|update|confirm|list|link|mark)_[a-z_]+$")
+TOOL_LIKE = re.compile(r"^(search|get|download|create|update|confirm|list|link|mark|add|preview|set)_[a-z_]+$")
 # Valores de parámetros que parecen nombres de tool y no lo son.
 NOT_TOOLS = {"link_pdf"}
 MAX_SKILL_LINES = 500

@@ -5,6 +5,7 @@
       "name": "search_certificates",
       "kind": "read",
       "restricted": false,
+      "scopes": [],
       "parameters": [
         {
           "name": "carrier",
@@ -67,6 +68,7 @@
       "name": "get_certificate",
       "kind": "read",
       "restricted": false,
+      "scopes": [],
       "parameters": [
         {
           "name": "unique_key",
@@ -78,9 +80,113 @@
       "description": "[Insurance Sync] Get one normalized certificate of the agency by its unique_key\n(opaque: copy it from a search_certificates row)."
     },
     {
+      "name": "search_sellers",
+      "kind": "read",
+      "restricted": false,
+      "scopes": [],
+      "parameters": [
+        {
+          "name": "query",
+          "type": "Optional[str]",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "active",
+          "type": "Optional[bool]",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "description": "[Insurance Sync] List the agency's sellers (vendedores), to find the seller_id of a person.\n\nquery: part of the name, without caring about accents or case (\"perez\" finds \"Pérez\"). active: true (the\ndefault) lists only active sellers, false only inactive ones, null both. Returns sellers [{seller_id,\nname, active, default_commission {pct, base} or null}] (at most 50) and total. Two sellers with a similar\nname: ask the person which one before using a seller_id. An inactive seller cannot be added to a policy."
+    },
+    {
+      "name": "get_policy_sellers",
+      "kind": "read",
+      "restricted": false,
+      "scopes": [],
+      "parameters": [
+        {
+          "name": "unique_key",
+          "type": "str",
+          "required": true
+        }
+      ],
+      "description": "[Insurance Sync] The sellers stored on one policy cycle (unique_key from search_policies).\n\nReturns version, origin and sellers [{seller_id, name, active, pct, base, fixed_amount, source,\nin_split}]. base is what pct applies to: net_premium (prima neta), agency_commission (comisión de la\nagencia) or agency_net_received (comisión neta recibida). The pct of different sellers do not add up to\n100: each is over its own base. in_split marks a reparto (a pool shared by several sellers). source says\nwhere pct came from: seller_rule, seller_default, all_sellers_rule, default_rule or manual. An empty list\nat version 0 means nobody assigned sellers."
+    },
+    {
+      "name": "preview_policy_sellers",
+      "kind": "read",
+      "restricted": false,
+      "scopes": [],
+      "parameters": [
+        {
+          "name": "unique_key",
+          "type": "str",
+          "required": true
+        },
+        {
+          "name": "seller_ids",
+          "type": "List[str]",
+          "required": true
+        }
+      ],
+      "description": "[Insurance Sync] What adding sellers to a policy would do, without saving anything.\n\nunique_key from search_policies; seller_ids (1 to 10) from search_sellers. Returns the sellers the policy\nhas now (version, sellers, as get_policy_sellers) and proposed [{seller_id, name, active,\nalready_on_policy, would_be_added, pct, base, source}]: the pct and base the agency's commission rules\ngive each seller on this policy. Show this to the person and wait for their explicit yes before\nadd_policy_sellers. A seller with active false cannot be added: leave it out."
+    },
+    {
+      "name": "add_policy_sellers",
+      "kind": "write",
+      "restricted": true,
+      "scopes": [
+        "sellers.assign"
+      ],
+      "parameters": [
+        {
+          "name": "unique_keys",
+          "type": "List[str]",
+          "required": true
+        },
+        {
+          "name": "seller_ids",
+          "type": "List[str]",
+          "required": true
+        }
+      ],
+      "description": "[Insurance Sync] Add sellers to policies (1 to 50 unique_keys, 1 to 10 seller_ids). Saves at once.\n\nOnly call it after preview_policy_sellers and the person's explicit yes. Each seller the policy does not\nhave yet is appended with the pct and base the rules give it there (the ones the preview showed); the\nsellers already on the policy, their pct and their repartos are left exactly as they are. Every seller\nmust be active, else nothing is saved. Returns requested, updated [{unique_key, version, sellers}],\nalready_had (policies that had every seller), skipped_missing (no policy of the agency) and\nskipped_conflict (somebody changed the policy's sellers meanwhile, or its stored list cannot be extended:\nread it with get_policy_sellers and tell the person). To change a pct or remove a seller use\nset_policy_sellers; a reparto is changed in the web app."
+    },
+    {
+      "name": "set_policy_sellers",
+      "kind": "write",
+      "restricted": true,
+      "scopes": [
+        "sellers.assign"
+      ],
+      "parameters": [
+        {
+          "name": "unique_key",
+          "type": "str",
+          "required": true
+        },
+        {
+          "name": "expected_version",
+          "type": "int",
+          "required": true
+        },
+        {
+          "name": "sellers",
+          "type": "List[Dict[str, Any]]",
+          "required": true
+        }
+      ],
+      "description": "[Insurance Sync] Replace the sellers of one policy cycle: change a pct or base, remove or add a seller.\nSaves at once.\n\nexpected_version: the version get_policy_sellers (or preview_policy_sellers) answered; if the sellers\nchanged since, nothing is saved: read them again and show the person. sellers: the WHOLE list that must\nremain, at most 10, each {seller_id, pct?, base?, fixed_amount?}; a seller left out is removed, [] removes\nevery seller. A seller already on the policy keeps the pct, base and fixed_amount the entry leaves out; a\nnew seller without pct or base gets what the agency's rules give it (as in preview_policy_sellers). base:\nnet_premium, agency_commission or agency_net_received. fixed_amount: an amount instead of the %, null\nclears it. A policy with a reparto (in_split) is refused: that is changed in the web app. Before calling\nit, show the person the list before and after and wait for their explicit yes. Returns version, sellers,\nchanged (false when the list was already that one), added and removed (names)."
+    },
+    {
       "name": "list_mailboxes",
       "kind": "read",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [],
       "description": "[Insurance Sync] List the agency's mailboxes the person has access to.\n\nReturns id, label, email, provider (gmail, outlook, imap), status and last_sync_at. Use the id\nas mailbox_id in search_emails. A mailbox the person cannot read is not listed."
     },
@@ -88,6 +194,9 @@
       "name": "search_emails",
       "kind": "read",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "mailbox_id",
@@ -162,6 +271,9 @@
       "name": "get_email",
       "kind": "read",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "email_id",
@@ -176,6 +288,9 @@
       "name": "get_email_attachment",
       "kind": "read",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "email_id",
@@ -196,6 +311,9 @@
       "name": "link_email",
       "kind": "write",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "email_id",
@@ -222,6 +340,9 @@
       "name": "mark_email_reviewed",
       "kind": "write",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "email_id",
@@ -242,6 +363,7 @@
       "name": "search_endorsements",
       "kind": "read",
       "restricted": false,
+      "scopes": [],
       "parameters": [
         {
           "name": "carrier",
@@ -280,6 +402,7 @@
       "name": "get_endorsement",
       "kind": "read",
       "restricted": false,
+      "scopes": [],
       "parameters": [
         {
           "name": "unique_key",
@@ -294,6 +417,7 @@
       "name": "search_files",
       "kind": "read",
       "restricted": false,
+      "scopes": [],
       "parameters": [
         {
           "name": "query",
@@ -344,6 +468,7 @@
       "name": "download_file",
       "kind": "read",
       "restricted": false,
+      "scopes": [],
       "parameters": [
         {
           "name": "file_id",
@@ -358,6 +483,9 @@
       "name": "search_mailbox",
       "kind": "read",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "mailbox_id",
@@ -420,6 +548,9 @@
       "name": "get_thread",
       "kind": "read",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "mailbox_id",
@@ -440,6 +571,9 @@
       "name": "get_mailbox_attachment",
       "kind": "read",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "mailbox_id",
@@ -466,6 +600,7 @@
       "name": "search_payments",
       "kind": "read",
       "restricted": false,
+      "scopes": [],
       "parameters": [
         {
           "name": "carrier",
@@ -522,6 +657,7 @@
       "name": "get_payment",
       "kind": "read",
       "restricted": false,
+      "scopes": [],
       "parameters": [
         {
           "name": "unique_key",
@@ -536,6 +672,7 @@
       "name": "search_policies",
       "kind": "read",
       "restricted": false,
+      "scopes": [],
       "parameters": [
         {
           "name": "carrier",
@@ -610,6 +747,7 @@
       "name": "get_policy",
       "kind": "read",
       "restricted": false,
+      "scopes": [],
       "parameters": [
         {
           "name": "unique_key",
@@ -624,6 +762,7 @@
       "name": "download_policy_pdf",
       "kind": "read",
       "restricted": false,
+      "scopes": [],
       "parameters": [
         {
           "name": "unique_key",
@@ -638,6 +777,9 @@
       "name": "create_policy_draft_from_pdf",
       "kind": "write",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "filename",
@@ -676,6 +818,9 @@
       "name": "create_policy_draft_from_file",
       "kind": "write",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "file_id",
@@ -702,6 +847,9 @@
       "name": "create_policy_draft",
       "kind": "write",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "file_id",
@@ -734,6 +882,9 @@
       "name": "get_policy_draft",
       "kind": "read",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "draft_id",
@@ -748,6 +899,9 @@
       "name": "update_policy_draft",
       "kind": "write",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "draft_id",
@@ -792,6 +946,9 @@
       "name": "confirm_policy_draft",
       "kind": "write",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "draft_id",
@@ -836,6 +993,9 @@
       "name": "list_policy_drafts",
       "kind": "read",
       "restricted": true,
+      "scopes": [
+        "policies.operate"
+      ],
       "parameters": [
         {
           "name": "status",

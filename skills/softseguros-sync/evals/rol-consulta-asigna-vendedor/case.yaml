@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: rol-consulta-asigna-vendedor
+expected_outcome: |
+  Como el catálogo no trae add_policy_sellers, explica que el rol de la persona no asigna vendedores y que un administrador lo cambia en Ajustes › Miembros; puede mostrar los vendedores actuales, pero no simula la asignación con otra tool.
+context:
+  scaffold_script: place-files.sh

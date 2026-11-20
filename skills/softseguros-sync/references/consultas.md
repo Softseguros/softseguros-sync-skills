@@ -27,7 +27,8 @@ Las ocho tools de consulta son de solo lectura y cualquier miembro de la agencia
 | `policy_pdf_status` | `linked`, `pending`, `queued`, `not_found`, `error`. |
 | `page`, `limit` | `limit` 20 por defecto, 50 máximo. |
 
-No hay filtro por tipo de póliza (lee `policy_type` en cada fila), por vendedor ni por producto,
+No hay filtro por tipo de póliza (lee `policy_type` en cada fila), por vendedor (lee
+`commission_sellers` en cada fila) ni por producto,
 y el orden es fijo: inicio de vigencia más
 reciente primero. Para «las próximas a vencer» acota con `end_date_from` / `end_date_to` en vez de
 pedir muchas páginas.
@@ -54,7 +55,7 @@ pedir muchas páginas.
 | `endorsements` | Anexos que la aseguradora trae dentro de la póliza (por ejemplo Bolívar). |
 | `ingestion_origin` | `bot` (la trajo el robot del portal) o `manual_pdf` (se creó desde un PDF). |
 | `manual_override_fields` | Campos que un anexo aplicado desde PDF cambió y el bot ya no sobrescribe. |
-| `commission_sellers` | Vendedores asignados a la póliza. |
+| `commission_sellers` | Vendedores asignados a la póliza (`sellers` con nombre, `pct`, `base`; `version`). `null`: nadie asignó vendedores. Para verlos o agregarlos: [vendedores.md](vendedores.md). |
 | `raw_data` | Lo que mandó la aseguradora, sin normalizar. Último recurso. |
 
 Una misma póliza aparece una vez por vigencia: la de 2025 y su renovación de 2026 son dos filas
